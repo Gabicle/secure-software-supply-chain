@@ -20,5 +20,13 @@ services:
     volumes:
       - supply_chain_db_data:/var/lib/postgresql/data
 
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
 volumes:
   supply_chain_db_data:
