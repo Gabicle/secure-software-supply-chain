@@ -4,3 +4,22 @@ __pycache__/
 .env
 .vscode/
 .venv-wsl/
+
+# Terraform working directories
+**/.terraform/*
+
+# Terraform state
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+
+# Terraform crash logs
+crash.log
+crash.*.log
+
+# Local Terraform variable files
+*.tfvars
+*.tfvars.json
+
+# Keep the dependency lock file
+!.terraform.lock.hcl

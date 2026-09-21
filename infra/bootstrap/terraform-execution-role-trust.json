@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::542489916995:root"
+      },
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "ArnLike": {
+          "aws:PrincipalArn": "arn:aws:iam::542489916995:role/aws-reserved/sso.amazonaws.com/eu-west-3/AWSReservedSSO_AdministratorAccess_*"
+        }
+      }
+    }
+  ]
+}
