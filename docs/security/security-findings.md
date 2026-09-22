@@ -153,3 +153,66 @@ Trivy was rerun after the remediation.
 zero security findings.
 
 Evidence: `trivy/v4-after-aws-0132.txt`
+
+---
+
+## AWS-0039 — EKS cluster secret encryption
+
+**Severity:** HIGH
+**Status:** ACCEPTED — scanner rule not applicable to pinned EKS version
+
+### Finding
+
+Trivy reports that the EKS cluster does not define an
+`encryption_config` block for Kubernetes Secrets.
+
+### Risk
+
+Kubernetes Secrets and other Kubernetes API data can contain sensitive
+information and must be encrypted at rest.
+
+### Investigation
+
+The EKS Kubernetes version was made explicit and pinned to version 1.36.
+
+AWS EKS automatically enables envelope encryption for Kubernetes API data,
+including Secrets, on EKS clusters running Kubernetes 1.28 or later.
+
+Therefore, the absence of a Terraform `encryption_config` block does not
+mean that Secrets are unencrypted for this EKS 1.36 cluster.
+
+Trivy's AWS-0039 rule statically checks for the Terraform
+`encryption_config` configuration and continues to report the finding.
+
+### Decision
+
+**ACCEPT**
+
+Do not introduce a customer-managed KMS key solely to satisfy the scanner.
+
+The cluster uses the encryption provided automatically by EKS 1.36.
+
+Using a customer-managed KMS key remains an architectural option if
+customer-controlled key policies and lifecycle management become a
+requirement.
+
+### Remediation / Hardening
+
+The EKS Kubernetes version is now explicitly configured and pinned to 1.36
+instead of relying on an implicit service default.
+
+This makes the encryption assumption explicit and reviewable.
+
+### Verification
+
+Terraform validation succeeded.
+
+Trivy was rerun after pinning EKS 1.36.
+
+AWS-0039 remains because the scanner expects an explicit
+`encryption_config` block.
+
+The finding is intentionally accepted based on the encryption behavior of
+EKS 1.36.
+
+Evidence: `trivy/v5-after-aws-0039-review.txt`

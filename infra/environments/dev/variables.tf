@@ -80,3 +80,8 @@ variable "terraform_execution_role_arn" {
   description = "IAM role assumed by Terraform when provisioning AWS resources"
   type        = string
 }
+
+variable "kubernetes_version" {
+  description = "Kubernetes version for the EKS cluster"
+  type        = string
+}

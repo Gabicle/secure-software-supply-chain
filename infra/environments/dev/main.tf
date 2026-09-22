@@ -14,8 +14,9 @@ module "vpc" {
 module "eks" {
   source = "../../modules/eks"
 
-  project_name = var.project_name
-  environment  = var.environment
+  project_name       = var.project_name
+  environment        = var.environment
+  kubernetes_version = var.kubernetes_version
 
   private_subnet_ids = module.vpc.private_subnet_ids
 

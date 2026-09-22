@@ -32,6 +32,7 @@ resource "aws_iam_role_policy_attachment" "cluster" {
 resource "aws_eks_cluster" "main" {
   name     = "${var.project_name}-${var.environment}"
   role_arn = aws_iam_role.cluster.arn
+  version  = var.kubernetes_version
 
   access_config {
     authentication_mode                         = "API"
