@@ -324,3 +324,64 @@ Trivy was rerun after increasing the backup retention period.
 AWS-0077 was no longer reported.
 
 Evidence: `trivy/v7-after-aws-0077.txt`
+
+---
+
+## AWS-0133 / AWS-0078 — RDS Database Insights monitoring and encryption
+
+**Severity:** LOW
+**Status:** REMEDIATED
+
+### Finding
+
+Trivy initially reported AWS-0133 because RDS Performance Insights was
+disabled.
+
+After enabling Performance Insights, Trivy identified AWS-0078 because
+the Performance Insights data would use an AWS-managed KMS key rather
+than a customer-managed key.
+
+### Risk
+
+Without database performance telemetry, visibility during performance
+issues and security investigations is reduced.
+
+Database performance telemetry may also contain sensitive operational
+information. Using a customer-managed KMS key provides additional control
+over encryption key policies and lifecycle.
+
+### Decision
+
+**FIX**
+
+Enable database performance telemetry and protect its data using a
+dedicated customer-managed KMS key.
+
+### Remediation
+
+Enabled RDS Performance Insights with a 7-day retention period.
+
+Created a dedicated customer-managed KMS key for RDS Database Insights
+data.
+
+Automatic KMS key rotation was enabled.
+
+Configured RDS Performance Insights to use the customer-managed KMS key.
+
+The key is separate from the Terraform state encryption key so the two
+security domains have independent key lifecycles and access controls.
+
+### Verification
+
+Terraform validation succeeded.
+
+Trivy was rerun after enabling Performance Insights and initially
+identified AWS-0078.
+
+After configuring the dedicated customer-managed KMS key, Trivy was
+rerun again.
+
+AWS-0133 and AWS-0078 were no longer reported, and no new finding was
+introduced.
+
+Evidence: `trivy/v8-after-aws-0133-0078.txt`

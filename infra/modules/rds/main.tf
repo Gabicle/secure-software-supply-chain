@@ -38,6 +38,10 @@ resource "aws_db_instance" "main" {
   engine_version = var.postgres_version
   instance_class = var.instance_class
 
+  performance_insights_enabled          = true
+  performance_insights_retention_period = 7
+  performance_insights_kms_key_id       = aws_kms_key.performance_insights.arn
+
   allocated_storage     = var.allocated_storage
   max_allocated_storage = var.max_allocated_storage
   storage_type          = "gp3"
@@ -64,5 +68,15 @@ resource "aws_db_instance" "main" {
   tags = {
     Project     = var.project_name
     Environment = var.environment
+  }
+}
+
+resource "aws_kms_key" "performance_insights" {
+  description             = "KMS key for RDS Database Insights"
+  enable_key_rotation     = true
+  deletion_window_in_days = 30
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-rds-insights"
   }
 }
