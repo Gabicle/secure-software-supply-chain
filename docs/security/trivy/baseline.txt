@@ -1,0 +1,280 @@
+
+Report Summary
+
+┌─────────────────────────┬───────────┬───────────────────┐
+│         Target          │   Type    │ Misconfigurations │
+├─────────────────────────┼───────────┼───────────────────┤
+│ bootstrap               │ terraform │         0         │
+├─────────────────────────┼───────────┼───────────────────┤
+│ bootstrap/state-main.tf │ terraform │         2         │
+├─────────────────────────┼───────────┼───────────────────┤
+│ environments/dev        │ terraform │         0         │
+├─────────────────────────┼───────────┼───────────────────┤
+│ modules/eks/main.tf     │ terraform │         3         │
+├─────────────────────────┼───────────┼───────────────────┤
+│ modules/rds/main.tf     │ terraform │         4         │
+├─────────────────────────┼───────────┼───────────────────┤
+│ modules/vpc/main.tf     │ terraform │         2         │
+└─────────────────────────┴───────────┴───────────────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+bootstrap/state-main.tf (terraform)
+===================================
+Tests: 2 (SUCCESSES: 0, FAILURES: 2)
+Failures: 2 (UNKNOWN: 0, LOW: 1, MEDIUM: 0, HIGH: 1, CRITICAL: 0)
+
+AWS-0089 (LOW): Bucket has logging disabled
+════════════════════════════════════════
+Ensures S3 bucket logging is enabled for S3 buckets
+
+See https://avd.aquasec.com/misconfig/aws-0089
+────────────────────────────────────────
+ bootstrap/state-main.tf:17-29
+────────────────────────────────────────
+  17 ┌ resource "aws_s3_bucket" "terraform_state" {
+  18 │   bucket = var.state_bucket_name
+  19 │ 
+  20 │   lifecycle {
+  21 │     prevent_destroy = true
+  22 │   }
+  23 │ 
+  24 │   tags = {
+  25 └     Project   = "secure-software-supply-chain"
+  ..   
+────────────────────────────────────────
+
+
+AWS-0132 (HIGH): Bucket does not encrypt data with a customer managed key.
+════════════════════════════════════════
+Encryption using AWS keys provides protection for your S3 buckets. To gain greater control over encryption, such as key rotation, access policies, and auditability, use customer managed keys (CMKs) with SSE-KMS.
+Note that SSE-KMS is not supported for S3 server access logging destination buckets; in such cases, use SSE-S3 instead.
+
+
+See https://avd.aquasec.com/misconfig/aws-0132
+────────────────────────────────────────
+ bootstrap/state-main.tf:48-56
+────────────────────────────────────────
+  48 ┌ resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" {
+  49 │   bucket = aws_s3_bucket.terraform_state.id
+  50 │ 
+  51 │   rule {
+  52 │     apply_server_side_encryption_by_default {
+  53 │       sse_algorithm = "AES256"
+  54 │     }
+  55 │   }
+  56 └ }
+────────────────────────────────────────
+
+
+
+modules/eks/main.tf (terraform)
+===============================
+Tests: 3 (SUCCESSES: 0, FAILURES: 3)
+Failures: 3 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 1, CRITICAL: 2)
+
+AWS-0039 (HIGH): Cluster does not have secret encryption enabled.
+════════════════════════════════════════
+EKS cluster resources should have the encryption_config block set with protection of the secrets resource.
+
+
+See https://avd.aquasec.com/misconfig/aws-0039
+────────────────────────────────────────
+ modules/eks/main.tf:32-63
+   via environments/dev/main.tf:14-29 (module.eks)
+────────────────────────────────────────
+  32 ┌ resource "aws_eks_cluster" "main" {
+  33 │   name     = "${var.project_name}-${var.environment}"
+  34 │   role_arn = aws_iam_role.cluster.arn
+  35 │ 
+  36 │   access_config {
+  37 │     authentication_mode                         = "API"
+  38 │     bootstrap_cluster_creator_admin_permissions = false
+  39 │   }
+  40 └ 
+  ..   
+────────────────────────────────────────
+
+
+AWS-0040 (CRITICAL): Public cluster access is enabled.
+════════════════════════════════════════
+EKS clusters are available publicly by default, this should be explicitly disabled in the vpc_config of the EKS cluster resource.
+
+
+See https://avd.aquasec.com/misconfig/aws-0040
+────────────────────────────────────────
+ modules/eks/main.tf:52
+   via modules/eks/main.tf:49-53 (vpc_config)
+    via modules/eks/main.tf:32-63 (aws_eks_cluster.main)
+     via environments/dev/main.tf:14-29 (module.eks)
+────────────────────────────────────────
+  32   resource "aws_eks_cluster" "main" {
+  ..   
+  52 [     endpoint_public_access  = true
+  ..   
+  63   }
+────────────────────────────────────────
+
+
+AWS-0041 (CRITICAL): Cluster allows access from a public CIDR: 0.0.0.0/0
+════════════════════════════════════════
+EKS Clusters have public access cidrs set to 0.0.0.0/0 by default which is wide open to the internet. This should be explicitly set to a more specific private CIDR range
+
+
+See https://avd.aquasec.com/misconfig/aws-0041
+────────────────────────────────────────
+ modules/eks/main.tf:49-53
+   via modules/eks/main.tf:32-63 (aws_eks_cluster.main)
+    via environments/dev/main.tf:14-29 (module.eks)
+────────────────────────────────────────
+  32   resource "aws_eks_cluster" "main" {
+  ..   
+  49 ┌   vpc_config {
+  50 │     subnet_ids              = var.private_subnet_ids
+  51 │     endpoint_private_access = true
+  52 │     endpoint_public_access  = true
+  53 └   }
+  ..   
+  63   }
+────────────────────────────────────────
+
+
+
+modules/rds/main.tf (terraform)
+===============================
+Tests: 4 (SUCCESSES: 0, FAILURES: 4)
+Failures: 4 (UNKNOWN: 0, LOW: 1, MEDIUM: 3, HIGH: 0, CRITICAL: 0)
+
+AWS-0077 (MEDIUM): Instance has very low backup retention period.
+════════════════════════════════════════
+RDS backup retention for clusters defaults to 1 day, this may not be enough to identify and respond to an issue. Backup retention periods should be set to a period that is a balance on cost and limiting risk.
+
+
+See https://avd.aquasec.com/misconfig/aws-0077
+────────────────────────────────────────
+ modules/rds/main.tf:57
+   via modules/rds/main.tf:34-68 (aws_db_instance.main)
+    via environments/dev/main.tf:31-54 (module.rds)
+────────────────────────────────────────
+  34   resource "aws_db_instance" "main" {
+  ..   
+  57 [   backup_retention_period = var.backup_retention_days
+  ..   
+  68   }
+────────────────────────────────────────
+
+
+AWS-0133 (LOW): Instance does not have performance insights enabled.
+════════════════════════════════════════
+Enabling Performance insights allows for greater depth in monitoring data.
+For example, information about active sessions could help diagose a compromise or assist in the investigation
+
+
+See https://avd.aquasec.com/misconfig/aws-0133
+────────────────────────────────────────
+ modules/rds/main.tf:34-68
+   via environments/dev/main.tf:31-54 (module.rds)
+────────────────────────────────────────
+  34 ┌ resource "aws_db_instance" "main" {
+  35 │   identifier = "${var.project_name}-${var.environment}-postgres"
+  36 │ 
+  37 │   engine         = "postgres"
+  38 │   engine_version = var.postgres_version
+  39 │   instance_class = var.instance_class
+  40 │ 
+  41 │   allocated_storage     = var.allocated_storage
+  42 └   max_allocated_storage = var.max_allocated_storage
+  ..   
+────────────────────────────────────────
+
+
+AWS-0176 (MEDIUM): Instance does not have IAM Authentication enabled
+════════════════════════════════════════
+Ensure IAM Database Authentication is enabled for RDS database instances to manage database access
+
+See https://avd.aquasec.com/misconfig/aws-0176
+────────────────────────────────────────
+ modules/rds/main.tf:34-68
+   via environments/dev/main.tf:31-54 (module.rds)
+────────────────────────────────────────
+  34 ┌ resource "aws_db_instance" "main" {
+  35 │   identifier = "${var.project_name}-${var.environment}-postgres"
+  36 │ 
+  37 │   engine         = "postgres"
+  38 │   engine_version = var.postgres_version
+  39 │   instance_class = var.instance_class
+  40 │ 
+  41 │   allocated_storage     = var.allocated_storage
+  42 └   max_allocated_storage = var.max_allocated_storage
+  ..   
+────────────────────────────────────────
+
+
+AWS-0177 (MEDIUM): Instance does not have Deletion Protection enabled
+════════════════════════════════════════
+Ensure deletion protection is enabled for RDS database instances.
+
+See https://avd.aquasec.com/misconfig/aws-0177
+────────────────────────────────────────
+ modules/rds/main.tf:59
+   via modules/rds/main.tf:34-68 (aws_db_instance.main)
+    via environments/dev/main.tf:31-54 (module.rds)
+────────────────────────────────────────
+  34   resource "aws_db_instance" "main" {
+  ..   
+  59 [   deletion_protection = var.deletion_protection
+  ..   
+  68   }
+────────────────────────────────────────
+
+
+
+modules/vpc/main.tf (terraform)
+===============================
+Tests: 2 (SUCCESSES: 0, FAILURES: 2)
+Failures: 2 (UNKNOWN: 0, LOW: 0, MEDIUM: 1, HIGH: 1, CRITICAL: 0)
+
+AWS-0164 (HIGH): Subnet associates public IP address.
+════════════════════════════════════════
+You should limit the provision of public IP addresses for resources. Resources should not be exposed on the public internet, but should have access limited to consumers required for the function of your application.
+
+
+See https://avd.aquasec.com/misconfig/aws-0164
+────────────────────────────────────────
+ modules/vpc/main.tf:27
+   via modules/vpc/main.tf:21-34 (aws_subnet.public[0])
+    via environments/dev/main.tf:1-12 (module.vpc)
+────────────────────────────────────────
+  21   resource "aws_subnet" "public" {
+  ..   
+  27 [   map_public_ip_on_launch = true
+  ..   
+  34   }
+────────────────────────────────────────
+
+
+AWS-0178 (MEDIUM): VPC does not have VPC Flow Logs enabled.
+════════════════════════════════════════
+VPC Flow Logs provide visibility into network traffic that traverses the VPC and can be used to detect anomalous traffic or insight during security workflows.
+
+
+See https://avd.aquasec.com/misconfig/aws-0178
+────────────────────────────────────────
+ modules/vpc/main.tf:1-10
+   via environments/dev/main.tf:1-12 (module.vpc)
+────────────────────────────────────────
+   1 ┌ resource "aws_vpc" "main" {
+   2 │   cidr_block           = var.vpc_cidr
+   3 │   enable_dns_support   = true
+   4 │   enable_dns_hostnames = true
+   5 │ 
+   6 │   tags = {
+   7 │     Name    = "${var.project_name}-${var.environment}-vpc"
+   8 │     Project = var.project_name
+   9 │   }
+  10 └ }
+────────────────────────────────────────
+
+
