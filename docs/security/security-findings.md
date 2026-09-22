@@ -216,3 +216,66 @@ The finding is intentionally accepted based on the encryption behavior of
 EKS 1.36.
 
 Evidence: `trivy/v5-after-aws-0039-review.txt`
+
+---
+
+## AWS-0040 / AWS-0041 — Public EKS API endpoint exposure
+
+**Severity:** CRITICAL
+**Status:** REMEDIATED
+
+### Finding
+
+Trivy reported two related findings:
+
+- AWS-0040: The EKS Kubernetes API endpoint had public access enabled.
+- AWS-0041: The public endpoint allowed access from the default
+  `0.0.0.0/0` CIDR.
+
+### Risk
+
+A public Kubernetes API endpoint increases the cluster's external attack
+surface.
+
+Authentication and authorization are still required to access the cluster,
+but an internet-reachable API endpoint can receive connection and
+authentication attempts from untrusted networks.
+
+### Decision
+
+**FIX**
+
+The EKS Kubernetes API does not need to be directly reachable from the
+public internet for this architecture.
+
+Use the EKS private API endpoint instead.
+
+### Remediation
+
+Changed the EKS VPC configuration to:
+
+`endpoint_private_access = true`
+
+`endpoint_public_access = false`
+
+The Kubernetes API is therefore reachable through the VPC's private
+connectivity rather than through the public EKS endpoint.
+
+Disabling the public endpoint also removes the `0.0.0.0/0` public endpoint
+exposure reported by AWS-0041.
+
+Administrative access to the private cluster must originate from the VPC
+or an appropriately connected network/environment.
+
+### Verification
+
+Terraform validation succeeded.
+
+Trivy was rerun after disabling public endpoint access.
+
+AWS-0040 and AWS-0041 were no longer reported.
+
+The EKS module now reports only AWS-0039, which was separately reviewed and
+accepted based on the encryption behavior of the pinned EKS version.
+
+Evidence: `trivy/v6-after-aws-0040-0041.txt`
