@@ -385,3 +385,46 @@ AWS-0133 and AWS-0078 were no longer reported, and no new finding was
 introduced.
 
 Evidence: `trivy/v8-after-aws-0133-0078.txt`
+
+---
+
+## AWS-0176 — RDS IAM database authentication disabled
+
+**Severity:** MEDIUM
+**Status:** REMEDIATED
+
+### Finding
+
+Trivy reported that the RDS PostgreSQL instance did not have IAM database
+authentication enabled.
+
+### Risk
+
+Without IAM database authentication, database access relies on traditional
+database credentials. IAM authentication provides an additional authentication
+mechanism using short-lived AWS authentication tokens and IAM permissions.
+
+### Decision
+
+**FIX**
+
+Enable IAM database authentication support for the RDS PostgreSQL instance.
+
+### Remediation
+
+Enabled IAM database authentication on the RDS instance:
+
+`iam_database_authentication_enabled = true`
+
+This enables the capability without automatically converting existing
+PostgreSQL users to IAM authentication.
+
+### Verification
+
+Terraform validation succeeded.
+
+Trivy was rerun after the change.
+
+AWS-0176 was no longer reported, and no new finding was introduced.
+
+Evidence: `trivy/v9-after-aws-0176.txt`

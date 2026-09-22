@@ -52,6 +52,8 @@ resource "aws_db_instance" "main" {
 
   manage_master_user_password = true
 
+  iam_database_authentication_enabled = true
+
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.database.id]
 
