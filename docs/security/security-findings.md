@@ -98,3 +98,58 @@ Trivy was rerun after the remediation.
 this change.
 
 Evidence: `trivy/v3-after-aws-0090.txt`
+
+---
+
+## AWS-0132 — Terraform state bucket not encrypted with a customer-managed KMS key
+
+**Severity:** HIGH  
+**Status:** REMEDIATED
+
+### Finding
+
+The Terraform state S3 bucket used SSE-S3 (`AES256`) encryption rather
+than a customer-managed AWS KMS key.
+
+### Risk
+
+SSE-S3 provides encryption at rest, but a customer-managed KMS key provides
+additional control over key lifecycle, rotation, access policies, and
+auditing.
+
+Terraform state can contain sensitive infrastructure information, making
+strong control over its encryption key appropriate.
+
+### Decision
+
+**FIX**
+
+Encrypt the Terraform state bucket using SSE-KMS with a dedicated
+customer-managed KMS key.
+
+The separate S3 server access logging destination remains encrypted with
+SSE-S3 because S3 server access log destination buckets do not support
+SSE-KMS.
+
+### Remediation
+
+Created a dedicated customer-managed AWS KMS key for Terraform state
+encryption.
+
+Automatic KMS key rotation was enabled.
+
+Changed the Terraform state bucket's default encryption from SSE-S3
+(`AES256`) to SSE-KMS (`aws:kms`) using the customer-managed key.
+
+S3 Bucket Keys were also enabled for the state bucket.
+
+### Verification
+
+Terraform configuration validation succeeded.
+
+Trivy was rerun after the remediation.
+
+`AWS-0132` was no longer reported, and the bootstrap configuration reported
+zero security findings.
+
+Evidence: `trivy/v4-after-aws-0132.txt`

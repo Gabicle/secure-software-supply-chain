@@ -54,8 +54,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" 
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      kms_master_key_id = aws_kms_key.terraform_state.arn
+      sse_algorithm     = "aws:kms"
     }
+
+    bucket_key_enabled = true
   }
 }
 
@@ -154,3 +157,16 @@ resource "aws_s3_bucket_versioning" "logging" {
     status = "Enabled"
   }
 }
+
+resource "aws_kms_key" "terraform_state" {
+  description             = "KMS key for Terraform state encryption"
+  enable_key_rotation     = true
+  deletion_window_in_days = 30
+
+  tags = {
+    Project   = "secure-software-supply-chain"
+    Purpose   = "terraform-state-encryption"
+    ManagedBy = "Terraform"
+  }
+}
+
