@@ -49,7 +49,7 @@ module "rds" {
   database_username = var.database_username
 
   multi_az              = false
-  backup_retention_days = 1
+  backup_retention_days = 7
   deletion_protection   = false
   skip_final_snapshot   = true
 }

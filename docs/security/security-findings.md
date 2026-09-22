@@ -279,3 +279,48 @@ The EKS module now reports only AWS-0039, which was separately reviewed and
 accepted based on the encryption behavior of the pinned EKS version.
 
 Evidence: `trivy/v6-after-aws-0040-0041.txt`
+
+---
+
+## AWS-0077 — RDS backup retention period too low
+
+**Severity:** MEDIUM
+**Status:** REMEDIATED
+
+### Finding
+
+Trivy reported that the RDS PostgreSQL instance had a very low automated
+backup retention period.
+
+The dev environment configured the retention period to 1 day.
+
+### Risk
+
+A one-day recovery window may be insufficient if data corruption,
+accidental deletion, or malicious activity is not detected immediately.
+
+The available clean backup could expire before the incident is identified.
+
+### Decision
+
+**FIX**
+
+Increase automated backup retention while keeping the configuration
+reasonable for a development environment.
+
+### Remediation
+
+Changed the RDS automated backup retention period from 1 day to 7 days.
+
+This provides a larger recovery window without adopting the longer
+retention period that might be appropriate for a production environment.
+
+### Verification
+
+Terraform validation succeeded.
+
+Trivy was rerun after increasing the backup retention period.
+
+AWS-0077 was no longer reported.
+
+Evidence: `trivy/v7-after-aws-0077.txt`
