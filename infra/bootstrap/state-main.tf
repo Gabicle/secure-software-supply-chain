@@ -146,3 +146,11 @@ resource "aws_s3_bucket_logging" "terraform_state" {
     aws_s3_bucket_policy.logging
   ]
 }
+
+resource "aws_s3_bucket_versioning" "logging" {
+  bucket = aws_s3_bucket.logging.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
