@@ -519,3 +519,69 @@ Trivy was rerun after the change.
 AWS-0164 was no longer reported, and no new finding was introduced.
 
 Evidence: `trivy/v11-after-aws-0164.txt`
+
+---
+
+## AWS-0178 / AWS-0017 — VPC Flow Logs and log encryption
+
+**Severity:** MEDIUM / LOW
+**Status:** REMEDIATED
+
+### Finding
+
+Trivy reported AWS-0178 because VPC Flow Logs were not enabled.
+
+After enabling VPC Flow Logs with CloudWatch Logs as the destination,
+Trivy reported AWS-0017 because the CloudWatch log group used default
+encryption rather than a customer-managed KMS key.
+
+### Risk
+
+Without VPC Flow Logs, network traffic metadata is unavailable for
+investigation of accepted and rejected connections, unexpected traffic
+patterns, and other network security events.
+
+Using a customer-managed KMS key for security telemetry provides additional
+control over encryption key policy, rotation, and lifecycle.
+
+### Decision
+
+**FIX**
+
+Enable VPC Flow Logs for accepted and rejected traffic and send the logs to
+CloudWatch Logs.
+
+Protect the CloudWatch log group with a dedicated customer-managed KMS key.
+
+### Remediation
+
+Enabled VPC Flow Logs with `traffic_type = "ALL"`.
+
+Created a CloudWatch log group with 30-day retention.
+
+Created a dedicated IAM role allowing the VPC Flow Logs service to publish
+to the specific CloudWatch log group.
+
+Restricted the role trust relationship using the AWS account and Flow Log
+source ARN.
+
+Created a dedicated customer-managed KMS key with automatic rotation and
+restricted CloudWatch Logs access using the log group's encryption context.
+
+Configured the CloudWatch log group to use the customer-managed KMS key.
+
+### Verification
+
+Terraform validation succeeded.
+
+Trivy was rerun after enabling VPC Flow Logs and identified AWS-0017.
+
+After configuring customer-managed KMS encryption, Trivy was rerun again.
+
+AWS-0178 and AWS-0017 were no longer reported, and no new finding was
+introduced.
+
+The only remaining Trivy finding is AWS-0039, which has already been reviewed
+and documented as accepted for the pinned EKS version.
+
+Evidence: `trivy/v12-after-aws-0178-0017.txt`

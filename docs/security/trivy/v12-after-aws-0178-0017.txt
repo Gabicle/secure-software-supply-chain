@@ -1,0 +1,53 @@
+2026-09-22T21:24:17Z	INFO	[misconfig] Misconfiguration scanning is enabled
+2026-09-22T21:24:17Z	INFO	[checks-client] Need to update the checks bundle
+2026-09-22T21:24:17Z	INFO	[checks-client] Downloading the checks bundle...
+234.65 KiB / 234.65 KiB [--------------------------------------------------------->] 100.00% ? p/s ?234.65 KiB / 234.65 KiB [-----------------------------------------------] 100.00% 4.01 MiB p/s 300ms2026-09-22T21:24:19Z	INFO	[terraform scanner] Scanning root module	file_path="bootstrap"
+2026-09-22T21:24:19Z	WARN	[terraform parser] Variable values were not found in the environment or variable files. Evaluating may not work correctly.	module="root" variables="state_bucket_name"
+2026-09-22T21:24:19Z	INFO	[terraform scanner] Scanning root module	file_path="environments/dev"
+2026-09-22T21:24:19Z	WARN	[terraform parser] Variable values were not found in the environment or variable files. Evaluating may not work correctly.	module="root" variables="availability_zones, aws_region, cluster_role_boundary_arn, database_name, database_username, environment, kubernetes_version, node_desired_size, node_instance_types, node_max_size, node_min_size, node_role_boundary_arn, postgres_version, private_subnet_cidrs, project_name, public_subnet_cidrs, rds_allocated_storage, rds_instance_class, rds_max_allocated_storage, terraform_execution_role_arn, vpc_cidr"
+2026-09-22T21:24:19Z	INFO	Detected config files	num=3
+
+Report Summary
+
+┌─────────────────────┬───────────┬───────────────────┐
+│       Target        │   Type    │ Misconfigurations │
+├─────────────────────┼───────────┼───────────────────┤
+│ bootstrap           │ terraform │         0         │
+├─────────────────────┼───────────┼───────────────────┤
+│ environments/dev    │ terraform │         0         │
+├─────────────────────┼───────────┼───────────────────┤
+│ modules/eks/main.tf │ terraform │         1         │
+└─────────────────────┴───────────┴───────────────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+modules/eks/main.tf (terraform)
+===============================
+Tests: 1 (SUCCESSES: 0, FAILURES: 1)
+Failures: 1 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 1, CRITICAL: 0)
+
+AWS-0039 (HIGH): Cluster does not have secret encryption enabled.
+════════════════════════════════════════
+EKS cluster resources should have the encryption_config block set with protection of the secrets resource.
+
+
+See https://avd.aquasec.com/misconfig/aws-0039
+────────────────────────────────────────
+ modules/eks/main.tf:32-64
+   via environments/dev/main.tf:14-30 (module.eks)
+────────────────────────────────────────
+  32 ┌ resource "aws_eks_cluster" "main" {
+  33 │   name     = "${var.project_name}-${var.environment}"
+  34 │   role_arn = aws_iam_role.cluster.arn
+  35 │   version  = var.kubernetes_version
+  36 │ 
+  37 │   access_config {
+  38 │     authentication_mode                         = "API"
+  39 │     bootstrap_cluster_creator_admin_permissions = false
+  40 └   }
+  ..   
+────────────────────────────────────────
+
+
