@@ -473,3 +473,49 @@ Trivy was rerun after the change.
 AWS-0177 was no longer reported, and no new finding was introduced.
 
 Evidence: `trivy/v10-after-aws-0177.txt`
+
+---
+
+## AWS-0164 — Public subnet automatically assigns public IP addresses
+
+**Severity:** HIGH
+**Status:** REMEDIATED
+
+### Finding
+
+Trivy reported that resources launched into the public subnets were configured
+to automatically receive public IPv4 addresses.
+
+### Risk
+
+Automatically assigning public IP addresses can unintentionally increase the
+internet-facing attack surface of resources launched into these subnets.
+
+A public subnet does not require every resource within it to have a public IP
+address.
+
+### Decision
+
+**FIX**
+
+Disable automatic public IPv4 assignment while preserving the public subnet
+routing required by internet-facing infrastructure.
+
+### Remediation
+
+Changed the public subnet configuration to:
+
+`map_public_ip_on_launch = false`
+
+The public subnets retain their route to the Internet Gateway. The NAT Gateway
+continues to use its explicitly allocated Elastic IP.
+
+### Verification
+
+Terraform validation succeeded.
+
+Trivy was rerun after the change.
+
+AWS-0164 was no longer reported, and no new finding was introduced.
+
+Evidence: `trivy/v11-after-aws-0164.txt`
