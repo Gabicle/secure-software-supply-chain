@@ -428,3 +428,48 @@ Trivy was rerun after the change.
 AWS-0176 was no longer reported, and no new finding was introduced.
 
 Evidence: `trivy/v9-after-aws-0176.txt`
+
+---
+
+## AWS-0177 — RDS deletion protection disabled
+
+**Severity:** MEDIUM
+**Status:** REMEDIATED
+
+### Finding
+
+Trivy reported that the RDS PostgreSQL instance did not have deletion
+protection enabled.
+
+### Risk
+
+Without deletion protection, the database instance can be deleted directly,
+increasing the risk of accidental or unauthorized database removal.
+
+### Decision
+
+**FIX**
+
+Enable deletion protection for the dev RDS instance.
+
+Although this environment is designed to be temporary, requiring deletion
+protection to be explicitly disabled before destruction adds a deliberate
+safety step.
+
+### Remediation
+
+Changed the dev environment configuration to:
+
+`deletion_protection = true`
+
+The RDS module was already parameterized to apply this setting.
+
+### Verification
+
+Terraform validation succeeded.
+
+Trivy was rerun after the change.
+
+AWS-0177 was no longer reported, and no new finding was introduced.
+
+Evidence: `trivy/v10-after-aws-0177.txt`

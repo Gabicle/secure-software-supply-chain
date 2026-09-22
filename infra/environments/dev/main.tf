@@ -50,6 +50,6 @@ module "rds" {
 
   multi_az              = false
   backup_retention_days = 7
-  deletion_protection   = false
+  deletion_protection   = true
   skip_final_snapshot   = true
 }
