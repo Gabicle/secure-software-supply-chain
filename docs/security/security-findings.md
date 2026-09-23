@@ -822,3 +822,49 @@ The execution-role policy predated VPC Flow Logs, its CloudWatch Logs/KMS resour
 **Remediation:** Added narrowly scoped lifecycle permissions. VPC Flow Logs and RDS monitoring roles are restricted to exact role ARNs, service-specific `iam:PassRole` conditions, and mandatory permissions boundaries. KMS key creation is constrained to symmetric AWS KMS encryption keys; subsequent KMS administration is limited to keys in the project account and region.
 
 **Residual risk:** KMS key ARNs are not known before creation, so `kms:CreateKey` requires `Resource: "*"`. Post-creation KMS lifecycle permissions currently use the account/region `key/*` scope. This bootstrap privilege should remain limited to the dedicated Terraform execution role and can be further isolated if the project later introduces unrelated customer-managed KMS keys.
+
+---
+
+### SEC-IAM-004 — EKS node permissions boundary blocked VPC CNI permissions
+
+**Status:** Remediated / Temporary Bootstrap Design
+
+The EKS managed node role had the AWS-managed `AmazonEKS_CNI_Policy` attached, but the custom node-role permissions boundary did not permit all EC2 actions required by the VPC CNI. Because a permissions boundary limits the maximum permissions available to the role, permissions granted by the AWS-managed policy were ineffective when they were outside the boundary.
+
+**Impact:** EC2 instances launched successfully and kubelet reached the private EKS API, authenticated, registered nodes, and sent heartbeats. However, the `aws-node` VPC CNI entered `CrashLoopBackOff`, causing the managed node group to fail with `NodeCreationFailure: Unhealthy nodes in kubernetes cluster`. CoreDNS health failures were a downstream symptom rather than the root cause.
+
+**Evidence:** EKS audit logs reported `MissingIAMPermissions` for VPC CNI EC2 operations. IAM policy simulation confirmed that the node permissions boundary was the limiting authorization layer.
+
+**Remediation:** Added only the required VPC CNI EC2 actions to the node-role permissions boundary, including network-interface lifecycle operations, private-IP assignment, interface modification, and tagging. The AWS-managed `AmazonEKS_CNI_Policy` remains attached to the node role as a temporary bootstrap mechanism.
+
+**Validation:** IAM simulation confirmed the required CNI actions were allowed by both the role permissions and permissions boundary. Fresh EKS audit logs showed no further `MissingIAMPermissions`, and replacement of the managed node group completed successfully.
+
+**Future Hardening:** Move VPC CNI permissions from the node role to EKS Pod Identity, then remove `AmazonEKS_CNI_Policy` and the CNI-specific permissions from the node-role boundary.
+
+---
+
+### SEC-IAM-005 — RDS Performance Insights required a constrained KMS grant
+
+**Status:** Remediated
+
+RDS creation initially failed because the Terraform execution role could describe the customer-managed Performance Insights KMS key but could not create the AWS-resource grant required for RDS to use it.
+
+**Risk:** Granting broad KMS cryptographic permissions such as unrestricted `kms:Encrypt`, `kms:Decrypt`, or `kms:GenerateDataKey` to the Terraform execution role would exceed the permissions required to provision the service.
+
+**Remediation:** Granted only `kms:CreateGrant` against customer-managed KMS keys in the project account and region, constrained by `kms:ViaService = rds.eu-west-3.amazonaws.com` and `kms:GrantIsForAWSResource = true`.
+
+**Validation:** IAM simulation with the required RDS context confirmed `kms:CreateGrant` was allowed. A negative simulation without the RDS service context remained denied. No broad cryptographic permissions were added to the Terraform execution role.
+
+---
+
+### SEC-IAM-006 — RDS managed master password required scoped Secrets Manager creation
+
+**Status:** Remediated
+
+After resolving KMS authorization, RDS creation exposed a second least-privilege gap: the Terraform execution role could not create or tag the Secrets Manager secret used by the RDS managed master-password feature.
+
+**Risk:** Broad Secrets Manager permissions would allow the Terraform execution role to create or modify unrelated application secrets.
+
+**Remediation:** Added only `secretsmanager:CreateSecret` and `secretsmanager:TagResource`, scoped to the AWS RDS managed-secret naming pattern `arn:aws:secretsmanager:eu-west-3:542489916995:secret:rds!*`. No permission to retrieve secret values was added.
+
+**Validation:** IAM simulation confirmed the two required operations were allowed. Terraform subsequently created the RDS instance successfully, including its AWS-managed master-user secret, and the final Terraform plan reported no changes.

@@ -15,7 +15,9 @@
         "ec2:DescribeNetworkInterfaces",
         "ec2:DescribeNetworkAcls",
         "ec2:DescribeAddresses",
-        "ec2:DescribeSecurityGroups"
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSecurityGroupRules",
+        "ec2:DescribeAddressesAttribute"
       ],
       "Resource": "*"
     },
@@ -121,7 +123,8 @@
           "iam:PolicyARN": [
             "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
             "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-            "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly"
+            "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly",
+            "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
           ]
         }
       }
@@ -176,12 +179,29 @@
         "eks:DeleteNodegroup",
         "eks:UpdateNodegroupConfig",
         "eks:UpdateNodegroupVersion",
+        "eks:CreateAddon",
+        "eks:DescribeAddon",
+        "eks:DeleteAddon",
+        "eks:UpdateAddon",
+        "eks:ListAddons",
+        "eks:DescribeAddonVersions",
         "eks:ListClusters",
         "eks:ListNodegroups",
         "eks:TagResource",
         "eks:UntagResource"
       ],
       "Resource": "*"
+    },
+    {
+      "Sid": "CreateRdsServiceLinkedRole",
+      "Effect": "Allow",
+      "Action": "iam:CreateServiceLinkedRole",
+      "Resource": "arn:aws:iam::*:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS",
+      "Condition": {
+        "StringEquals": {
+          "iam:AWSServiceName": "rds.amazonaws.com"
+        }
+      }
     },
     {
       "Sid": "RdsReadAccess",

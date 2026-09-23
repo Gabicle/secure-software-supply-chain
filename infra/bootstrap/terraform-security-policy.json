@@ -43,9 +43,9 @@
       "Action": [
         "logs:CreateLogGroup",
         "logs:DeleteLogGroup",
-        "logs:DescribeLogGroups",
         "logs:PutRetentionPolicy",
         "logs:TagResource",
+        "logs:ListTagsForResource",
         "logs:UntagResource",
         "logs:AssociateKmsKey",
         "logs:DisassociateKmsKey"
@@ -54,6 +54,12 @@
         "arn:aws:logs:eu-west-3:542489916995:log-group:/aws/vpc/secure-software-supply-chain-dev/flow-logs",
         "arn:aws:logs:eu-west-3:542489916995:log-group:/aws/vpc/secure-software-supply-chain-dev/flow-logs:*"
       ]
+    },
+    {
+      "Sid": "DescribeCloudWatchLogGroups",
+      "Effect": "Allow",
+      "Action": "logs:DescribeLogGroups",
+      "Resource": "*"
     },
     {
       "Sid": "CreateProjectKmsKeys",
@@ -69,6 +75,15 @@
       }
     },
     {
+      "Sid": "CreateRdsManagedMasterSecret",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:CreateSecret",
+        "secretsmanager:TagResource"
+      ],
+      "Resource": "arn:aws:secretsmanager:eu-west-3:542489916995:secret:rds!*"
+    },
+    {
       "Sid": "ManageProjectKmsKeys",
       "Effect": "Allow",
       "Action": [
@@ -78,11 +93,26 @@
         "kms:GetKeyPolicy",
         "kms:PutKeyPolicy",
         "kms:TagResource",
+        "kms:ListResourceTags",
         "kms:UntagResource",
         "kms:ScheduleKeyDeletion",
         "kms:CancelKeyDeletion"
       ],
       "Resource": "arn:aws:kms:eu-west-3:542489916995:key/*"
+    },
+    {
+      "Sid": "CreateRdsKmsGrant",
+      "Effect": "Allow",
+      "Action": "kms:CreateGrant",
+      "Resource": "arn:aws:kms:eu-west-3:542489916995:key/*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "rds.eu-west-3.amazonaws.com"
+        },
+        "Bool": {
+          "kms:GrantIsForAWSResource": "true"
+        }
+      }
     },
     {
       "Sid": "CreateRdsMonitoringRole",
@@ -113,7 +143,7 @@
       "Resource": "arn:aws:iam::542489916995:role/secure-software-supply-chain-dev-rds-monitoring",
       "Condition": {
         "StringEquals": {
-          "iam:PassedToService": "monitoring.rds.amazonaws.com"
+          "iam:PassedToService": "rds.amazonaws.com"
         }
       }
     },
