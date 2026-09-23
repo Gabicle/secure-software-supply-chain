@@ -619,3 +619,16 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** Checkov changed from 116 passed / 18 failed to 117 passed / 17 failed, and `CKV_AWS_129` now passes.
 
 ---
+
+### CKV_AWS_157 — RDS Multi-AZ
+
+- **Status:** Accepted risk — development environment
+- **Resource:** `module.rds.aws_db_instance.main`
+- **Finding:** Checkov reports that the RDS instance does not have Multi-AZ enabled.
+- **Risk:** A Single-AZ database does not provide the cross-AZ standby and automatic failover available with an RDS Multi-AZ deployment, reducing availability during instance or Availability Zone failures.
+- **Assessment:** The RDS module supports Multi-AZ through `var.multi_az`, but the `dev` environment deliberately sets `multi_az = false`.
+- **Decision:** Accept for the cost-conscious development/demo environment. Production environments should set `multi_az = true`.
+- **Terraform change:** None.
+- **Validation:** Checkov is correctly detecting the Single-AZ configuration; this finding is an intentional risk acceptance rather than a scanner false positive.
+
+---
