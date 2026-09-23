@@ -695,3 +695,14 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** `terraform validate` succeeded. Checkov rescan confirms `CKV2_AWS_60` passes and the failed-check count decreased from 16 to 15.
 
 ---
+
+### CKV2_AWS_12 — Default VPC Security Group
+
+- **Status:** Remediated
+- **Resource:** `module.vpc.aws_vpc.main`
+- **Finding:** Checkov reported that the VPC's default security group was not explicitly configured to restrict all traffic.
+- **Risk:** Resources accidentally associated with the default security group could inherit unintended network connectivity instead of using purpose-specific security groups.
+- **Remediation:** Added an `aws_default_security_group` resource that manages the VPC's default security group with no ingress or egress rules, implementing a default-deny posture.
+- **Validation:** `terraform validate` succeeded. Checkov rescan confirms `CKV2_AWS_12` passes and the failed-check count decreased from 15 to 14.
+
+---
