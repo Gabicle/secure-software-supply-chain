@@ -719,3 +719,18 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** Finding reviewed against current AWS RDS for PostgreSQL logging guidance. No Terraform change made.
 
 ---
+
+### CKV2_AWS_62 — S3 Event Notifications
+
+- **Status:** Accepted / Deferred Detection Control
+- **Resources:** Terraform state bucket and S3 access-log bucket
+- **Finding:** Checkov recommends enabling S3 event notifications.
+- **Risk:** Security-relevant object operations may not generate an immediate alert.
+- **Security Decision:** Generic S3 notifications are not enabled solely to satisfy the scanner. Notifications without a defined security consumer or response workflow would add infrastructure and noise without providing a meaningful detection capability.
+- **Terraform State Bucket:** Object-level state modification and deletion events are security relevant. A production implementation should evaluate targeted CloudTrail S3 data events and EventBridge rules for state-object operations.
+- **Access-Log Bucket:** Object creation is expected high-volume behavior, so alerting on every object creation would create unnecessary noise. Detection should focus on abnormal deletion, policy/configuration changes, or other explicitly defined security events.
+- **Compensating Controls:** State bucket versioning, KMS encryption, public-access blocking, access logging, lifecycle management, and `prevent_destroy` are enabled.
+- **Future Hardening:** Implement targeted S3 data-event monitoring and alerting with a defined destination and incident-response workflow.
+- **Validation:** Reviewed against AWS S3, CloudTrail, and EventBridge event-monitoring capabilities. No Terraform change made.
+
+---
