@@ -107,3 +107,23 @@ jobs:
           --severity HIGH,CRITICAL
           --ignore-unfixed
           --exit-code 1
+
+  container-build:
+    name: Container Build
+    runs-on: ubuntu-latest
+    needs:
+      - backend
+      - frontend
+      - secrets
+      - sast
+      - sca
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Build backend image
+        run: docker build --tag secure-backend:${{ github.sha }} ./app
+
+      - name: Build frontend image
+        run: docker build --tag secure-frontend:${{ github.sha }} ./frontend
