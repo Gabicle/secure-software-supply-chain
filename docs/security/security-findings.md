@@ -585,3 +585,37 @@ The only remaining Trivy finding is AWS-0039, which has already been reviewed
 and documented as accepted for the pinned EKS version.
 
 Evidence: `trivy/v12-after-aws-0178-0017.txt`
+
+---
+
+### CKV_AWS_58 — EKS secrets encryption
+
+- **Status:** Accepted / scanner limitation
+- **Resource:** `module.eks.aws_eks_cluster.main`
+- **Finding:** Checkov reports that the EKS cluster does not explicitly configure secrets encryption.
+- **Assessment:** The cluster is pinned to Kubernetes 1.36. Amazon EKS 1.28 and later automatically applies envelope encryption to Kubernetes API data using AWS-managed encryption by default.
+- **Decision:** No Terraform change. Adding configuration solely to satisfy the scanner would not address an actual lack of encryption.
+- **Related finding:** Trivy `AWS-0039`.
+
+---
+
+### CKV_AWS_339 — EKS supported Kubernetes version
+
+- **Status:** Accepted / scanner limitation
+- **Resource:** `module.eks.aws_eks_cluster.main`
+- **Finding:** Checkov reports that the configured EKS Kubernetes version is unsupported.
+- **Assessment:** The dev environment is pinned to EKS Kubernetes 1.36, which is currently supported by Amazon EKS. The Checkov result does not reflect the current EKS support lifecycle.
+- **Decision:** No Terraform change. Continue pinning the Kubernetes version explicitly and validate it against the AWS EKS support lifecycle during upgrades.
+
+---
+
+### CKV_AWS_129 — RDS log exports
+
+- **Status:** Remediated
+- **Resource:** `module.rds.aws_db_instance.main`
+- **Finding:** RDS engine logs were not configured for export to CloudWatch Logs.
+- **Risk:** Without centralized database logs, security investigation, troubleshooting, and operational visibility are reduced.
+- **Remediation:** Enabled CloudWatch export of the `postgresql` and `upgrade` logs.
+- **Validation:** Checkov changed from 116 passed / 18 failed to 117 passed / 17 failed, and `CKV_AWS_129` now passes.
+
+---

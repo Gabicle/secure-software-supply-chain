@@ -62,10 +62,16 @@ resource "aws_db_instance" "main" {
 
   backup_retention_period = var.backup_retention_days
 
+  enabled_cloudwatch_logs_exports = [
+    "postgresql",
+    "upgrade"
+  ]
+
   deletion_protection = var.deletion_protection
   skip_final_snapshot = var.skip_final_snapshot
 
   auto_minor_version_upgrade = true
+
 
   tags = {
     Project     = var.project_name
