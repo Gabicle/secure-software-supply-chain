@@ -706,3 +706,16 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** `terraform validate` succeeded. Checkov rescan confirms `CKV2_AWS_12` passes and the failed-check count decreased from 15 to 14.
 
 ---
+
+### CKV2_AWS_30 — PostgreSQL Query Logging
+
+- **Status:** Accepted / Compensating Controls
+- **Resource:** `module.rds.aws_db_instance.main`
+- **Finding:** Checkov recommends enabling PostgreSQL query logging through a custom RDS parameter group.
+- **Risk:** Insufficient database query logging can reduce visibility during troubleshooting and security investigations.
+- **Security Decision:** Broad PostgreSQL statement logging is not enabled solely to satisfy the scanner. AWS warns that statement logging can expose sensitive information, including credentials and application data, in database logs.
+- **Compensating Controls:** PostgreSQL and upgrade logs are exported to CloudWatch, RDS Enhanced Monitoring is enabled, Performance Insights is enabled with KMS encryption, and IAM database authentication is enabled.
+- **Future Hardening:** If database-level audit requirements are introduced, evaluate targeted logging such as `log_min_duration_statement` or pgAudit with appropriate log-access controls and sensitive-data protections.
+- **Validation:** Finding reviewed against current AWS RDS for PostgreSQL logging guidance. No Terraform change made.
+
+---
