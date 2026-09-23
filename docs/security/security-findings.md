@@ -643,3 +643,16 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** `terraform validate` succeeded. Checkov rescan confirms `CKV_AWS_118` passes and reports no new failed checks for the monitoring IAM role.
 
 ---
+
+### CKV_AWS_338 — CloudWatch Log Retention
+
+- **Status:** Accepted risk — development environment
+- **Resource:** `module.vpc.aws_cloudwatch_log_group.vpc_flow_logs`
+- **Finding:** Checkov requires CloudWatch log groups to retain logs for at least one year. The VPC Flow Logs group is configured for 30 days.
+- **Risk:** Security investigations occurring more than 30 days after an event will not have access to these historical VPC Flow Logs.
+- **Assessment:** The log group has explicit retention configured, but the 30-day period does not meet Checkov's one-year policy threshold. This project uses a short-lived, cost-conscious development/demo environment.
+- **Decision:** Retain 30 days for `dev`. Production or compliance-sensitive environments should define a longer retention period based on investigation and regulatory requirements.
+- **Terraform change:** None.
+- **Validation:** Checkov correctly reports `CKV_AWS_338`; this is an intentional development-environment risk acceptance.
+
+---
