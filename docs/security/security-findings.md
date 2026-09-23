@@ -773,3 +773,16 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** Reviewed against current AWS RDS Performance Insights and AWS KMS authorization guidance. No Terraform change made.
 
 ---
+
+### TOOL-SC-001 — Checkov Container Tag and Runtime Version Mismatch
+
+- **Status:** Documented / Supply-Chain Observation
+- **Component:** Checkov container image
+- **Finding:** The scanner image selected as `bridgecrew/checkov:3.3.10` was pinned and executed by immutable digest, but the Checkov process inside the image reports version `3.3.9`.
+- **Risk:** Container tags are mutable metadata and do not by themselves prove which software version is contained in an image. A mismatch between the advertised tag and the embedded tool version can undermine assumptions about scanner capabilities, vulnerability fixes, and policy behavior.
+- **Security Decision:** Scanner execution is pinned to the verified image digest for reproducibility. The runtime-reported version is treated as the authoritative version of Checkov actually executed rather than assuming the container tag accurately represents its contents.
+- **Evidence:** Checkov scan output records `version: 3.3.9` while the project invocation uses the digest obtained from the `3.3.10` image.
+- **Future Hardening:** CI/CD scanner upgrades should verify both the image digest and the scanner's runtime-reported version before adopting a new release. Where available, verify upstream image provenance/signatures or attestations in addition to digest pinning.
+- **Validation:** The mismatch was reproduced directly from the pinned container and reviewed against upstream release information.
+
+---
