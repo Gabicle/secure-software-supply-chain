@@ -1,0 +1,135 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PassVpcFlowLogsRole",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::542489916995:role/secure-software-supply-chain-dev-vpc-flow-logs",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "vpc-flow-logs.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Sid": "CreateVpcFlowLogsRole",
+      "Effect": "Allow",
+      "Action": "iam:CreateRole",
+      "Resource": "arn:aws:iam::542489916995:role/secure-software-supply-chain-dev-vpc-flow-logs",
+      "Condition": {
+        "ArnEquals": {
+          "iam:PermissionsBoundary": "arn:aws:iam::542489916995:policy/SecureSupplyChainVpcFlowLogsRoleBoundary"
+        }
+      }
+    },
+    {
+      "Sid": "ManageVpcFlowLogsRole",
+      "Effect": "Allow",
+      "Action": [
+        "iam:DeleteRole",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:TagRole",
+        "iam:UntagRole",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:GetRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::542489916995:role/secure-software-supply-chain-dev-vpc-flow-logs"
+    },
+    {
+      "Sid": "ManageVpcFlowLogsLogGroup",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:DeleteLogGroup",
+        "logs:DescribeLogGroups",
+        "logs:PutRetentionPolicy",
+        "logs:TagResource",
+        "logs:UntagResource",
+        "logs:AssociateKmsKey",
+        "logs:DisassociateKmsKey"
+      ],
+      "Resource": [
+        "arn:aws:logs:eu-west-3:542489916995:log-group:/aws/vpc/secure-software-supply-chain-dev/flow-logs",
+        "arn:aws:logs:eu-west-3:542489916995:log-group:/aws/vpc/secure-software-supply-chain-dev/flow-logs:*"
+      ]
+    },
+    {
+      "Sid": "CreateProjectKmsKeys",
+      "Effect": "Allow",
+      "Action": "kms:CreateKey",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "kms:KeySpec": "SYMMETRIC_DEFAULT",
+          "kms:KeyUsage": "ENCRYPT_DECRYPT",
+          "kms:KeyOrigin": "AWS_KMS"
+        }
+      }
+    },
+    {
+      "Sid": "ManageProjectKmsKeys",
+      "Effect": "Allow",
+      "Action": [
+        "kms:DescribeKey",
+        "kms:EnableKeyRotation",
+        "kms:GetKeyRotationStatus",
+        "kms:GetKeyPolicy",
+        "kms:PutKeyPolicy",
+        "kms:TagResource",
+        "kms:UntagResource",
+        "kms:ScheduleKeyDeletion",
+        "kms:CancelKeyDeletion"
+      ],
+      "Resource": "arn:aws:kms:eu-west-3:542489916995:key/*"
+    },
+    {
+      "Sid": "CreateRdsMonitoringRole",
+      "Effect": "Allow",
+      "Action": "iam:CreateRole",
+      "Resource": "arn:aws:iam::542489916995:role/secure-software-supply-chain-dev-rds-monitoring",
+      "Condition": {
+        "ArnEquals": {
+          "iam:PermissionsBoundary": "arn:aws:iam::542489916995:policy/SecureSupplyChainRdsMonitoringRoleBoundary"
+        }
+      }
+    },
+    {
+      "Sid": "ManageRdsMonitoringRole",
+      "Effect": "Allow",
+      "Action": [
+        "iam:DeleteRole",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:TagRole",
+        "iam:UntagRole"
+      ],
+      "Resource": "arn:aws:iam::542489916995:role/secure-software-supply-chain-dev-rds-monitoring"
+    },
+    {
+      "Sid": "PassRdsMonitoringRole",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::542489916995:role/secure-software-supply-chain-dev-rds-monitoring",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "monitoring.rds.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Sid": "AttachRdsMonitoringPolicy",
+      "Effect": "Allow",
+      "Action": [
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::542489916995:role/secure-software-supply-chain-dev-rds-monitoring",
+      "Condition": {
+        "ArnEquals": {
+          "iam:PolicyARN": "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
+        }
+      }
+    }
+  ]
+}
