@@ -133,6 +133,16 @@ jobs:
           ignore-unfixed: true
           exit-code: 1
 
+      - name: Generate backend SBOM
+        run: |
+          mkdir -p sbom
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD/sbom:/output" \
+            anchore/syft@sha256:500e2d872ac019436926e8322b4fc1f39441d94d21f6f4046c6ff29b30e8cb02 \
+            secure-backend:${{ github.sha }} \
+            -o cyclonedx-json=/output/backend-sbom.cdx.json
+
       - name: Build frontend image
         run: docker build --tag secure-frontend:${{ github.sha }} ./frontend
 
@@ -143,3 +153,22 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: 1
+
+      - name: Generate frontend SBOM
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD/sbom:/output" \
+            anchore/syft@sha256:500e2d872ac019436926e8322b4fc1f39441d94d21f6f4046c6ff29b30e8cb02 \
+            secure-frontend:${{ github.sha }} \
+            -o cyclonedx-json=/output/frontend-sbom.cdx.json
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: |
+            sbom/backend-sbom.cdx.json
+            sbom/frontend-sbom.cdx.json
+          if-no-files-found: error
+          retention-days: 30
