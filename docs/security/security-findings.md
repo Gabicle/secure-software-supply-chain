@@ -786,3 +786,39 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** The mismatch was reproduced directly from the pinned container and reviewed against upstream release information.
 
 ---
+
+### SEC-IAM-001 — Incorrect permissions boundary required for EKS cluster role
+
+**Status:** Remediated
+
+The Terraform execution-role policy required the EKS cluster role to be created with the node-role permissions boundary rather than the dedicated cluster-role boundary.
+
+**Risk:** The incorrect boundary could prevent deployment or apply an inappropriate maximum-permissions policy to the EKS cluster role.
+
+**Remediation:** Updated `CreateEksClusterRole` to require `SecureSupplyChainEksClusterRoleBoundary`.
+
+---
+
+### SEC-IAM-002 — Terraform execution role could modify or remove EKS permissions boundaries
+
+**Status:** Remediated
+
+The Terraform execution role allowed `iam:PutRolePermissionsBoundary` and `iam:DeleteRolePermissionsBoundary` against the project EKS roles.
+
+**Risk:** A compromised or misused Terraform execution role could weaken the permissions-boundary guardrail after role creation.
+
+**Remediation:** Removed permissions-boundary mutation permissions. EKS roles must be created with their approved boundary, while subsequent boundary changes require a separate privileged administrative operation.
+
+---
+
+### SEC-IAM-003 — Terraform execution policy did not cover newly introduced infrastructure securely
+
+**Status:** Remediated
+
+The execution-role policy predated VPC Flow Logs, its CloudWatch Logs/KMS resources, RDS Enhanced Monitoring, and the Performance Insights KMS key.
+
+**Risk:** Terraform deployments would fail due to missing permissions. Broadly granting IAM, CloudWatch Logs, or KMS administration to solve the problem would unnecessarily increase the Terraform execution role's privilege.
+
+**Remediation:** Added narrowly scoped lifecycle permissions. VPC Flow Logs and RDS monitoring roles are restricted to exact role ARNs, service-specific `iam:PassRole` conditions, and mandatory permissions boundaries. KMS key creation is constrained to symmetric AWS KMS encryption keys; subsequent KMS administration is limited to keys in the project account and region.
+
+**Residual risk:** KMS key ARNs are not known before creation, so `kms:CreateKey` requires `Resource: "*"`. Post-creation KMS lifecycle permissions currently use the account/region `key/*` scope. This bootstrap privilege should remain limited to the dedicated Terraform execution role and can be further isolated if the project later introduces unrelated customer-managed KMS keys.

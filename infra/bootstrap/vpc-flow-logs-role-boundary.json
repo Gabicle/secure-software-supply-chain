@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VpcFlowLogsDeliveryOnly",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:eu-west-3:542489916995:log-group:/aws/vpc/secure-software-supply-chain-dev/flow-logs:*"
+    }
+  ]
+}

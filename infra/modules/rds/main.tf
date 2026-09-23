@@ -36,7 +36,8 @@ resource "aws_vpc_security_group_ingress_rule" "postgres" {
 }
 
 resource "aws_iam_role" "rds_monitoring" {
-  name = "${var.project_name}-${var.environment}-rds-monitoring"
+  name                 = "${var.project_name}-${var.environment}-rds-monitoring"
+  permissions_boundary = var.rds_monitoring_role_boundary_arn
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

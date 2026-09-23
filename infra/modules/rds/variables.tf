@@ -72,3 +72,8 @@ variable "skip_final_snapshot" {
   description = "Whether to skip the final snapshot when destroying the database"
   type        = bool
 }
+
+variable "rds_monitoring_role_boundary_arn" {
+  description = "ARN of the permissions boundary for the RDS Enhanced Monitoring IAM role"
+  type        = string
+}

@@ -9,6 +9,8 @@ module "vpc" {
   availability_zones   = var.availability_zones
   public_subnet_cidrs  = var.public_subnet_cidrs
   private_subnet_cidrs = var.private_subnet_cidrs
+
+  vpc_flow_logs_role_boundary_arn = var.vpc_flow_logs_role_boundary_arn
 }
 
 module "eks" {
@@ -52,4 +54,6 @@ module "rds" {
   backup_retention_days = 7
   deletion_protection   = true
   skip_final_snapshot   = true
+
+  rds_monitoring_role_boundary_arn = var.rds_monitoring_role_boundary_arn
 }

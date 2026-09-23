@@ -85,3 +85,13 @@ variable "kubernetes_version" {
   description = "Kubernetes version for the EKS cluster"
   type        = string
 }
+
+variable "vpc_flow_logs_role_boundary_arn" {
+  description = "ARN of the permissions boundary for the VPC Flow Logs IAM role"
+  type        = string
+}
+
+variable "rds_monitoring_role_boundary_arn" {
+  description = "ARN of the permissions boundary for the RDS Enhanced Monitoring IAM role"
+  type        = string
+}

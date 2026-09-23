@@ -27,3 +27,8 @@ variable "private_subnet_cidrs" {
   description = "CIDR blocks for private subnets"
   type        = list(string)
 }
+
+variable "vpc_flow_logs_role_boundary_arn" {
+  description = "ARN of the permissions boundary for the VPC Flow Logs IAM role"
+  type        = string
+}

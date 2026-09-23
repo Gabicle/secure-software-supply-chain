@@ -66,7 +66,8 @@ resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
 }
 
 resource "aws_iam_role" "vpc_flow_logs" {
-  name = "${var.project_name}-${var.environment}-vpc-flow-logs"
+  name                 = "${var.project_name}-${var.environment}-vpc-flow-logs"
+  permissions_boundary = var.vpc_flow_logs_role_boundary_arn
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
