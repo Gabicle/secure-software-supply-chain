@@ -84,6 +84,8 @@ resource "aws_db_instance" "main" {
   performance_insights_retention_period = 7
   performance_insights_kms_key_id       = aws_kms_key.performance_insights.arn
 
+  copy_tags_to_snapshot = true
+
   allocated_storage     = var.allocated_storage
   max_allocated_storage = var.max_allocated_storage
   storage_type          = "gp3"

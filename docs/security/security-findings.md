@@ -656,3 +656,42 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** Checkov correctly reports `CKV_AWS_338`; this is an intentional development-environment risk acceptance.
 
 ---
+
+### CKV_AWS_144 — Terraform State Cross-Region Replication
+
+- **Status:** Accepted risk — development environment
+- **Resource:** `aws_s3_bucket.terraform_state`
+- **Finding:** Checkov reports that the Terraform state bucket does not have S3 Cross-Region Replication enabled.
+- **Risk:** The project does not maintain an automatically replicated Terraform state copy in a second AWS Region, reducing resilience to a Region-level disruption.
+- **Existing Controls:** The state bucket uses S3 Versioning, encryption at rest, public-access blocking, and Terraform `prevent_destroy`.
+- **Assessment:** Cross-Region Replication would provide additional regional disaster-recovery capability but requires a destination bucket, replication IAM permissions, and additional storage/transfer resources. The current project environment is a short-lived development/demo environment and does not have a multi-region recovery requirement.
+- **Decision:** Accept for `dev`. Production environments should evaluate Cross-Region Replication according to defined RPO, RTO, compliance, and regional disaster-recovery requirements.
+- **Terraform change:** None.
+- **Validation:** Checkov correctly reports `CKV_AWS_144`; this is an intentional development-environment risk acceptance.
+
+---
+
+### CKV_AWS_144 — Terraform State Access-Log Cross-Region Replication
+
+- **Status:** Accepted risk — development environment
+- **Resource:** `aws_s3_bucket.logging`
+- **Finding:** Checkov reports that the Terraform state access-log bucket does not have S3 Cross-Region Replication enabled.
+- **Risk:** Access logs are not automatically replicated to a second AWS Region, reducing their availability during a Region-level disruption.
+- **Existing Controls:** The access-log bucket has versioning, encryption at rest, public-access blocking, and Terraform `prevent_destroy`.
+- **Assessment:** Cross-Region Replication would provide additional regional resilience but would require a destination bucket, replication IAM permissions, and additional storage/transfer resources. The development environment has no defined multi-region audit or disaster-recovery requirement.
+- **Decision:** Accept for `dev`. Production or compliance-sensitive environments should evaluate replication according to log-retention, audit, RPO/RTO, and regional disaster-recovery requirements.
+- **Terraform change:** None.
+- **Validation:** Checkov correctly reports `CKV_AWS_144`; this is an intentional development-environment risk acceptance.
+
+---
+
+### CKV2_AWS_60 — RDS Copy Tags to Snapshots
+
+- **Status:** Remediated
+- **Resource:** `module.rds.aws_db_instance.main`
+- **Finding:** Checkov reported that RDS was not configured to copy database instance tags to snapshots.
+- **Risk:** Snapshots created without the database's tags can lose ownership, environment, project, and governance metadata, making asset inventory, cost attribution, and operational investigation more difficult.
+- **Remediation:** Enabled `copy_tags_to_snapshot = true` on the RDS instance.
+- **Validation:** `terraform validate` succeeded. Checkov rescan confirms `CKV2_AWS_60` passes and the failed-check count decreased from 16 to 15.
+
+---
