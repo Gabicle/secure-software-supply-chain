@@ -734,3 +734,16 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** Reviewed against AWS S3, CloudTrail, and EventBridge event-monitoring capabilities. No Terraform change made.
 
 ---
+
+### CKV_AWS_145 — S3 Access-Log Bucket Does Not Use KMS Encryption
+
+- **Status:** Accepted / Service Compatibility
+- **Resource:** S3 server access logging destination bucket
+- **Finding:** Checkov recommends encrypting the S3 bucket with AWS KMS rather than SSE-S3.
+- **Risk:** SSE-S3 provides encryption at rest but does not provide the additional key-level access control, auditing, and lifecycle management available with a customer-managed KMS key.
+- **Security Decision:** The access-log destination intentionally uses SSE-S3 (`AES256`). AWS documentation for S3 server access logging states that the destination bucket should use SSE-S3. Changing the bucket to default SSE-KMS solely to satisfy the scanner could interfere with reliable access to delivered server access logs.
+- **Compensating Controls:** The logging bucket has S3 Block Public Access enabled, versioning enabled, a restricted bucket policy allowing the S3 logging service to write only to the expected prefix, source-account and source-bucket restrictions, and lifecycle management. The Terraform state bucket itself is separately protected with a customer-managed KMS key.
+- **Future Hardening:** Re-evaluate the logging architecture if stronger customer-managed key control is required, using an AWS-supported logging destination and encryption design.
+- **Validation:** Reviewed against current AWS S3 server access logging encryption requirements. No Terraform change made.
+
+---
