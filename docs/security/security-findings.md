@@ -760,3 +760,16 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** A candidate explicit policy was tested with Checkov and rejected because it introduced broader IAM least-privilege findings. No explicit key policy is retained at this stage.
 
 ---
+
+### CKV2_AWS_64 — RDS Performance Insights KMS Key Policy
+
+- **Status:** Accepted / Deferred Least-Privilege Hardening
+- **Resource:** RDS Performance Insights customer-managed KMS key
+- **Finding:** Checkov recommends defining an explicit KMS key policy in Terraform.
+- **Risk:** Without an explicit key policy in Infrastructure as Code, authorization for the KMS key is less visible and relies on the AWS KMS default authorization model together with IAM.
+- **Security Decision:** An explicit policy is intentionally deferred until the operational principals that require access to Performance Insights data are finalized. Creating a broad placeholder policy solely to satisfy the scanner would weaken the least-privilege design.
+- **Compensating Controls:** Performance Insights is enabled and encrypted using a dedicated customer-managed KMS key with automatic key rotation enabled.
+- **Future Hardening:** Define explicit key-administrator and key-user permissions. Restrict Performance Insights key usage to the required principals and RDS service path using conditions such as `kms:ViaService` and appropriate encryption-context restrictions.
+- **Validation:** Reviewed against current AWS RDS Performance Insights and AWS KMS authorization guidance. No Terraform change made.
+
+---
