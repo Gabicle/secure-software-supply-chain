@@ -228,6 +228,32 @@
         "rds:RemoveTagsFromResource"
       ],
       "Resource": "*"
+    },
+    {
+      "Sid": "ManageProjectEcrRepositories",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:CreateRepository",
+        "ecr:DeleteRepository",
+        "ecr:DescribeRepositories",
+        "ecr:ListTagsForResource",
+        "ecr:TagResource",
+        "ecr:UntagResource",
+        "ecr:PutImageTagMutability",
+        "ecr:GetLifecyclePolicy",
+        "ecr:PutLifecyclePolicy",
+        "ecr:DeleteLifecyclePolicy"
+      ],
+      "Resource": "arn:aws:ecr:eu-west-3:542489916995:repository/secure-software-supply-chain-dev-*"
+    },
+    {
+      "Sid": "ManageEcrRegistryScanning",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:GetRegistryScanningConfiguration",
+        "ecr:PutRegistryScanningConfiguration"
+      ],
+      "Resource": "*"
     }
   ]
 }

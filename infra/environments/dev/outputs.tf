@@ -14,3 +14,18 @@ output "rds_master_user_secret_arn" {
   value     = module.rds.master_user_secret_arn
   sensitive = true
 }
+
+output "ecr_repository_names" {
+  description = "Names of the application ECR repositories"
+  value       = module.ecr.repository_names
+}
+
+output "ecr_repository_urls" {
+  description = "URLs of the application ECR repositories"
+  value       = module.ecr.repository_urls
+}
+
+output "ecr_repository_arns" {
+  description = "ARNs of the application ECR repositories"
+  value       = module.ecr.repository_arns
+}

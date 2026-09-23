@@ -57,3 +57,10 @@ module "rds" {
 
   rds_monitoring_role_boundary_arn = var.rds_monitoring_role_boundary_arn
 }
+
+module "ecr" {
+  source = "../../modules/ecr"
+
+  project_name = var.project_name
+  environment  = var.environment
+}
