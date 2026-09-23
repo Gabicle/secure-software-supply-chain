@@ -219,4 +219,3 @@ resource "aws_kms_key" "terraform_state" {
     ManagedBy = "Terraform"
   }
 }
-

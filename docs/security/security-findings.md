@@ -747,3 +747,16 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** Reviewed against current AWS S3 server access logging encryption requirements. No Terraform change made.
 
 ---
+
+### CKV2_AWS_64 — Terraform State KMS Key Policy
+
+- **Status:** Accepted / Deferred Least-Privilege Hardening
+- **Resource:** Terraform state customer-managed KMS key
+- **Finding:** Checkov recommends defining an explicit KMS key policy in Terraform.
+- **Risk:** Relying on the AWS KMS default key policy makes the key's authorization model less explicit in Infrastructure as Code and delegates access control through IAM.
+- **Security Decision:** An explicit default-style key policy was evaluated but not retained. Although it satisfied CKV2_AWS_64, the broad `kms:*` and `Resource = "*"` permissions introduced additional least-privilege findings. Replacing the existing authorization model solely to satisfy the scanner would therefore not represent a security improvement.
+- **Compensating Controls:** The Terraform state bucket uses a dedicated customer-managed KMS key with automatic key rotation enabled. The state bucket also has public-access blocking, versioning, access logging, lifecycle protection, and `prevent_destroy`.
+- **Future Hardening:** Define separate KMS key-administrator and key-user principals after the final Terraform execution and CI/CD identities are established, then implement and test a least-privilege explicit key policy without risking loss of state access.
+- **Validation:** A candidate explicit policy was tested with Checkov and rejected because it introduced broader IAM least-privilege findings. No explicit key policy is retained at this stage.
+
+---
