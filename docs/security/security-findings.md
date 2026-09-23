@@ -632,3 +632,14 @@ Evidence: `trivy/v12-after-aws-0178-0017.txt`
 - **Validation:** Checkov is correctly detecting the Single-AZ configuration; this finding is an intentional risk acceptance rather than a scanner false positive.
 
 ---
+
+### CKV_AWS_118 — RDS Enhanced Monitoring
+
+- **Status:** Remediated
+- **Resource:** `module.rds.aws_db_instance.main`
+- **Finding:** Checkov reported that RDS Enhanced Monitoring was not enabled.
+- **Risk:** Without Enhanced Monitoring, OS-level database host telemetry such as CPU, memory, processes, and I/O is less visible, reducing operational and security observability.
+- **Remediation:** Enabled RDS Enhanced Monitoring with a 60-second collection interval and created a dedicated IAM role trusted by the RDS monitoring service. The role uses the AWS-managed `AmazonRDSEnhancedMonitoringRole` policy, and its trust policy is constrained by source account and RDS DB ARN.
+- **Validation:** `terraform validate` succeeded. Checkov rescan confirms `CKV_AWS_118` passes and reports no new failed checks for the monitoring IAM role.
+
+---
