@@ -29,3 +29,8 @@ output "ecr_repository_arns" {
   description = "ARNs of the application ECR repositories"
   value       = module.ecr.repository_arns
 }
+
+output "github_actions_ecr_role_arn" {
+  description = "IAM role assumed by GitHub Actions for ECR publishing"
+  value       = module.github_oidc.role_arn
+}

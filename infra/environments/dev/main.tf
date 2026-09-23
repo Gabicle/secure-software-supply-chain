@@ -64,3 +64,16 @@ module "ecr" {
   project_name = var.project_name
   environment  = var.environment
 }
+
+module "github_oidc" {
+  source = "../../modules/github_oidc"
+
+  github_owner         = "Gabicle"
+  github_repository    = "secure-software-supply-chain"
+  github_branch        = "main"
+  github_owner_id      = "49395894"
+  github_repository_id = "1383990768"
+
+  ecr_repository_arns      = values(module.ecr.repository_arns)
+  permissions_boundary_arn = "arn:aws:iam::542489916995:policy/SecureSupplyChainGitHubActionsEcrRoleBoundary"
+}
