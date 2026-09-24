@@ -210,6 +210,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+
       - name: Download scanned container images
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v8
         with:
@@ -239,6 +242,14 @@ jobs:
 
           docker push "$ECR_REGISTRY/$ECR_BACKEND_REPOSITORY:$IMAGE_TAG"
 
+          BACKEND_DIGEST="$(
+            docker inspect \
+              --format='{{index .RepoDigests 0}}' \
+              "$ECR_REGISTRY/$ECR_BACKEND_REPOSITORY:$IMAGE_TAG"
+          )"
+
+          echo "BACKEND_IMAGE=$BACKEND_DIGEST" >> "$GITHUB_ENV"
+
       - name: Push frontend image
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
@@ -249,3 +260,18 @@ jobs:
             "$ECR_REGISTRY/$ECR_FRONTEND_REPOSITORY:$IMAGE_TAG"
 
           docker push "$ECR_REGISTRY/$ECR_FRONTEND_REPOSITORY:$IMAGE_TAG"
+
+          FRONTEND_DIGEST="$(
+            docker inspect \
+              --format='{{index .RepoDigests 0}}' \
+              "$ECR_REGISTRY/$ECR_FRONTEND_REPOSITORY:$IMAGE_TAG"
+          )"
+
+          echo "FRONTEND_IMAGE=$FRONTEND_DIGEST" >> "$GITHUB_ENV"
+
+      - name: Sign container images
+        env:
+          COSIGN_YES: "true"
+        run: |
+          cosign sign "$BACKEND_IMAGE"
+          cosign sign "$FRONTEND_IMAGE"
