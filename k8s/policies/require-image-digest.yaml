@@ -1,0 +1,30 @@
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: require-image-digest
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - pods
+  matchConditions:
+    - name: supply-chain-namespace
+      expression: "object.metadata.namespace == 'supply-chain'"
+  validationActions:
+    - Deny
+  variables:
+    - name: images
+      expression: >-
+        object.spec.containers.map(c, parseImageReference(c.image))
+        + object.spec.?initContainers.orValue([]).map(c, parseImageReference(c.image))
+        + object.spec.?ephemeralContainers.orValue([]).map(c, parseImageReference(c.image))
+  validations:
+    - expression: "variables.images.all(i, i.containsDigest())"
+      message: "Container images must be pinned by digest."
