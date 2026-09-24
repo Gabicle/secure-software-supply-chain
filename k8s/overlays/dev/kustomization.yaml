@@ -7,11 +7,11 @@ resources:
 images:
   - name: backend-image
     newName: 542489916995.dkr.ecr.eu-west-3.amazonaws.com/secure-software-supply-chain-dev-backend
-    digest: sha256:f3c6ac33dc09df37da7f15118b43222fc09206097f84f67e5405fd97a2792e0a
+    digest: sha256:5552cf0ecc5a4e06dd4405af0457d1ff15b76c600d7468dabacc2658ae4e666e
 
   - name: frontend-image
     newName: 542489916995.dkr.ecr.eu-west-3.amazonaws.com/secure-software-supply-chain-dev-frontend
-    digest: sha256:2f4b17bc424cee6d163eedcf7d45e7477e0c5f7393dd101ded103521eada921f
+    digest: sha256:41882c97a420e06c0210fc6b04a4dda3af065df9cffcca1f73697c535d5db37f
 
 labels:
   - pairs:
