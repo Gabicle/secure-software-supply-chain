@@ -13,5 +13,11 @@ RUN npm run build
 
 FROM nginxinc/nginx-unprivileged@sha256:6a23acdfca2b9cfbcec61419e3f1426bcbedb91362f2f19306a8567423bb4612 AS runtime
 
+USER root
+
+RUN apk upgrade --no-cache libexpat
+
+USER 101
+
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html

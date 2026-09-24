@@ -9,6 +9,7 @@ metadata:
 
 spec:
   replicas: 1
+
   selector:
     matchLabels:
       app.kubernetes.io/name: frontend
@@ -47,6 +48,10 @@ spec:
             timeoutSeconds: 2
             failureThreshold: 3
 
+          volumeMounts:
+            - name: nginx-tmp
+              mountPath: /tmp
+
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -63,3 +68,7 @@ spec:
             limits:
               cpu: 250m
               memory: 128Mi
+
+      volumes:
+        - name: nginx-tmp
+          emptyDir: {}
