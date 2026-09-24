@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bad-image-tag
+  namespace: supply-chain
+spec:
+  containers:
+    - name: test
+      image: reg.kyverno.io/kyverno/kyverno:v1.19.1
+      securityContext:
+        privileged: false
+        runAsNonRoot: true
+        runAsUser: 10001
