@@ -22,6 +22,7 @@ module "eks" {
 
   private_subnet_ids = module.vpc.private_subnet_ids
 
+  cluster_admin_role_arn    = var.eks_cluster_admin_role_arn
   cluster_role_boundary_arn = var.cluster_role_boundary_arn
   node_role_boundary_arn    = var.node_role_boundary_arn
 

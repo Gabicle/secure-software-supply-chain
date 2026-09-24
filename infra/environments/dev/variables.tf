@@ -95,3 +95,8 @@ variable "rds_monitoring_role_boundary_arn" {
   description = "ARN of the permissions boundary for the RDS Enhanced Monitoring IAM role"
   type        = string
 }
+
+variable "eks_cluster_admin_role_arn" {
+  description = "IAM role ARN granted administrative access to the EKS cluster"
+  type        = string
+}

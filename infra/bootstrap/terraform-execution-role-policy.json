@@ -188,7 +188,14 @@
         "eks:ListClusters",
         "eks:ListNodegroups",
         "eks:TagResource",
-        "eks:UntagResource"
+        "eks:UntagResource",
+        "eks:CreateAccessEntry",
+        "eks:DeleteAccessEntry",
+        "eks:DescribeAccessEntry",
+        "eks:ListAccessEntries",
+        "eks:AssociateAccessPolicy",
+        "eks:DisassociateAccessPolicy",
+        "eks:ListAssociatedAccessPolicies"
       ],
       "Resource": "*"
     },

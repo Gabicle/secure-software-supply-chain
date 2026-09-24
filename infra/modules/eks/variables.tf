@@ -47,3 +47,8 @@ variable "kubernetes_version" {
   description = "Kubernetes version for the EKS cluster"
   type        = string
 }
+
+variable "cluster_admin_role_arn" {
+  description = "IAM role ARN granted administrative access to the EKS cluster"
+  type        = string
+}
