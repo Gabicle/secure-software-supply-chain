@@ -100,3 +100,8 @@ variable "eks_cluster_admin_role_arn" {
   description = "IAM role ARN granted administrative access to the EKS cluster"
   type        = string
 }
+
+variable "external_secrets_role_boundary_arn" {
+  description = "Permissions boundary ARN for the External Secrets Pod Identity role"
+  type        = string
+}

@@ -78,3 +78,64 @@ module "github_oidc" {
   ecr_repository_arns      = values(module.ecr.repository_arns)
   permissions_boundary_arn = "arn:aws:iam::542489916995:policy/SecureSupplyChainGitHubActionsEcrRoleBoundary"
 }
+
+data "aws_iam_policy_document" "external_secrets_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
+    }
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession"
+    ]
+  }
+}
+
+resource "aws_iam_role" "external_secrets" {
+  name                 = "${var.project_name}-${var.environment}-external-secrets"
+  assume_role_policy   = data.aws_iam_policy_document.external_secrets_assume_role.json
+  permissions_boundary = var.external_secrets_role_boundary_arn
+
+  tags = {
+    Project     = var.project_name
+    Environment = var.environment
+    Purpose     = "external-secrets"
+  }
+}
+
+data "aws_iam_policy_document" "external_secrets" {
+  statement {
+    sid    = "ReadRdsMasterSecret"
+    effect = "Allow"
+
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret"
+    ]
+
+    resources = [
+      module.rds.master_user_secret_arn
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "external_secrets" {
+  name   = "${var.project_name}-${var.environment}-external-secrets"
+  role   = aws_iam_role.external_secrets.id
+  policy = data.aws_iam_policy_document.external_secrets.json
+}
+
+resource "aws_eks_pod_identity_association" "external_secrets" {
+  cluster_name    = module.eks.cluster_name
+  namespace       = "external-secrets"
+  service_account = "external-secrets"
+  role_arn        = aws_iam_role.external_secrets.arn
+
+  depends_on = [
+    module.eks
+  ]
+}

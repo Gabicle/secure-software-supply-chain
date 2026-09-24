@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+images:
+  - name: backend-image
+    newName: 542489916995.dkr.ecr.eu-west-3.amazonaws.com/secure-software-supply-chain-dev-backend
+    digest: sha256:f3c6ac33dc09df37da7f15118b43222fc09206097f84f67e5405fd97a2792e0a
+
+  - name: frontend-image
+    newName: 542489916995.dkr.ecr.eu-west-3.amazonaws.com/secure-software-supply-chain-dev-frontend
+    digest: sha256:2f4b17bc424cee6d163eedcf7d45e7477e0c5f7393dd101ded103521eada921f
+
+labels:
+  - pairs:
+      environment: dev
