@@ -179,6 +179,21 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Export scanned container images
+        run: |
+          docker save \
+            secure-backend:${{ github.sha }} \
+            secure-frontend:${{ github.sha }} \
+            | gzip > scanned-images.tar.gz
+
+      - name: Upload scanned container images
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: scanned-images-${{ github.sha }}
+          path: scanned-images.tar.gz
+          if-no-files-found: error
+          retention-days: 1
+
   publish-images:
     name: Publish Images to ECR
     runs-on: ubuntu-24.04
@@ -195,6 +210,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Download scanned container images
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v8
+        with:
+          name: scanned-images-${{ github.sha }}
+
+      - name: Load scanned container images
+        run: gunzip -c scanned-images.tar.gz | docker load
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
@@ -205,24 +228,24 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2
 
-      - name: Build and push backend image
+      - name: Push backend image
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build \
-            --tag "$ECR_REGISTRY/$ECR_BACKEND_REPOSITORY:$IMAGE_TAG" \
-            ./app
+          docker tag \
+            "secure-backend:$IMAGE_TAG" \
+            "$ECR_REGISTRY/$ECR_BACKEND_REPOSITORY:$IMAGE_TAG"
 
           docker push "$ECR_REGISTRY/$ECR_BACKEND_REPOSITORY:$IMAGE_TAG"
 
-      - name: Build and push frontend image
+      - name: Push frontend image
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build \
-            --tag "$ECR_REGISTRY/$ECR_FRONTEND_REPOSITORY:$IMAGE_TAG" \
-            ./frontend
+          docker tag \
+            "secure-frontend:$IMAGE_TAG" \
+            "$ECR_REGISTRY/$ECR_FRONTEND_REPOSITORY:$IMAGE_TAG"
 
           docker push "$ECR_REGISTRY/$ECR_FRONTEND_REPOSITORY:$IMAGE_TAG"
