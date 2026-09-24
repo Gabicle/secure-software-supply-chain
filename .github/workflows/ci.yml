@@ -5,6 +5,13 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      publish_images:
+        description: "Publish scanned images to ECR and sign them"
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -200,7 +207,9 @@ jobs:
     needs:
       - container-build
 
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      inputs.publish_images == true
 
     permissions:
       contents: read
